@@ -64,8 +64,11 @@ void List_Error(void) {
  * @param list Ukazatel na strukturu jednosměrně vázaného seznamu
  */
 void List_Init( List *list ) {
-	solved = false; /* V případě řešení, smažte tento řádek! */
+	list->firstElement = NULL;
+	list->activeElement = NULL;
+	list->currentLength = 0;
 }
+
 
 /**
  * Zruší všechny prvky seznamu list a uvede seznam list do stavu, v jakém se nacházel
@@ -75,7 +78,14 @@ void List_Init( List *list ) {
  * @param list Ukazatel na inicializovanou strukturu jednosměrně vázaného seznamu
  **/
 void List_Dispose( List *list ) {
-	solved = false; /* V případě řešení, smažte tento řádek! */
+	ListElementPtr tmp;
+	while (list->firstElement != NULL) {	// Itterates thrue all elements 
+		tmp = list->firstElement;
+		list->firstElement = list->firstElement->nextElement;
+		free(tmp);
+	}
+	list->activeElement = NULL;
+	list->currentLength = 0;
 }
 
 /**
@@ -87,7 +97,14 @@ void List_Dispose( List *list ) {
  * @param data Hodnota k vložení na začátek seznamu
  */
 void List_InsertFirst( List *list, int data ) {
-	solved = false; /* V případě řešení, smažte tento řádek! */
+	ListElementPtr firstElement = (ListElementPtr)malloc(sizeof(struct ListElement)); // Malloc for new element
+	if (firstElement == NULL) {
+		List_Error();
+	}
+	firstElement->data = data;
+	firstElement->nextElement = NULL;
+	list->firstElement = firstElement;
+	list->currentLength++;
 }
 
 /**
@@ -97,7 +114,7 @@ void List_InsertFirst( List *list, int data ) {
  * @param list Ukazatel na inicializovanou strukturu jednosměrně vázaného seznamu
  */
 void List_First( List *list ) {
-	solved = false; /* V případě řešení, smažte tento řádek! */
+	list->activeElement = list->firstElement;	
 }
 
 /**
@@ -108,7 +125,10 @@ void List_First( List *list ) {
  * @param dataPtr Ukazatel na cílovou proměnnou
  */
 void List_GetFirst( List *list, int *dataPtr ) {
-	solved = false; /* V případě řešení, smažte tento řádek! */
+	if(list->firstElement == NULL) {
+		List_Error();	
+	}
+	*dataPtr = list->firstElement->data;
 }
 
 /**
@@ -119,7 +139,14 @@ void List_GetFirst( List *list, int *dataPtr ) {
  * @param list Ukazatel na inicializovanou strukturu jednosměrně vázaného seznamu
  */
 void List_DeleteFirst( List *list ) {
-	solved = false; /* V případě řešení, smažte tento řádek! */
+	solved=false;
+	// ListElementPtr tmp = list->firstElement;
+	// list->firstElement = tmp->nextElement;
+	// if(list->activeElement == tmp) {
+	// 	list->activeElement = NULL;
+	// }
+	// free(tmp);
+	// list->currentLength--;
 }
 
 /**
