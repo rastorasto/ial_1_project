@@ -85,6 +85,7 @@ void test_dispose_queue_list(DLList *list)
 		temporaryElement = list->firstElement->nextElement;
 		QosPacketListPtr subList = (QosPacketListPtr) list->firstElement->data;
 		test_dispose_list(subList->list);
+		free(subList->list);
 		free(subList);
 		free(list->firstElement);
 		list->firstElement = temporaryElement;

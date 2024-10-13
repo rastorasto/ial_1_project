@@ -28,7 +28,47 @@ bool solved;
  * @param packet Ukazatel na strukturu přijatého paketu
  */
 void receive_packet( DLList *packetLists, PacketPtr packet ) {
-	solved = false; /* V případě řešení, smažte tento řádek! */
+	DLL_First(packetLists);
+	QosPacketListPtr tmp = NULL;
+	while(packetLists->activeElement != NULL){
+		QosPacketListPtr tmp = (QosPacketListPtr)packetLists->activeElement->data;
+		if(tmp->priority == packet->priority){
+			if((tmp->list->currentLength)+1 > MAX_PACKET_COUNT){
+				DLL_First(tmp->list);
+				while(tmp->list->activeElement != NULL){
+					DLL_DeleteAfter(tmp->list);
+					DLL_Next(tmp->list);
+				}
+			}
+			DLL_InsertLast(tmp->list, (long)packet);
+			return;
+		} else if (tmp->priority > packet->priority){
+			break;
+		}
+		DLL_Next(packetLists);
+	}
+	QosPacketListPtr newQosPacketList = (QosPacketListPtr)malloc(sizeof(QosPacketList));
+	if (newQosPacketList == NULL) {
+		error_flag = true;
+		return;
+	}
+	newQosPacketList->priority = packet->priority;
+	newQosPacketList->list = (DLList *)malloc(sizeof(DLList));
+	if (newQosPacketList->list == NULL) {
+		free(newQosPacketList);
+		error_flag = true;
+		return;
+	}
+	DLL_Init(newQosPacketList->list);
+	if(packetLists->activeElement == NULL){
+		DLL_InsertLast(packetLists, (long)newQosPacketList);
+	} else {
+		if(tmp->priority > packet->priority){
+			DLL_InsertBefore(packetLists, (long)newQosPacketList);
+		} else {
+			DLL_InsertAfter(packetLists, (long)newQosPacketList);
+		}
+	}
 }
 
 /**
@@ -47,5 +87,26 @@ void receive_packet( DLList *packetLists, PacketPtr packet ) {
  * @param maxPacketCount Maximální počet paketů k odeslání
  */
 void send_packets( DLList *packetLists, DLList *outputPacketList, int maxPacketCount ) {
-	solved = false; /* V případě řešení, smažte tento řádek! */
+	// QosPacketListPtr tmp = (QosPacketListPtr)packetLists->activeElement->data;
+	// DLLElementPtr tmpElement = packetLists->activeElement;
+	// while(tmpElement != packetLists->lastElement){
+	// 	DLL_First(packetLists);
+	// 	while(packetLists->activeElement != packetLists->lastElement){
+	// 		if (tmp->priority < ((QosPacketListPtr)packetLists->activeElement->data)->priority && (QosPacketListPtr)packetLists->currentLength > 0){
+	// 			tmp = (QosPacketListPtr)packetLists->activeElement->data;
+	// 		}
+	// 		DLL_Next(packetLists);
+	// 	}
+	// 	DLL_First(tmp->list);
+	// 	while(tmp->list->activeElement != tmp->list->lastElement){
+	// 		if(maxPacketCount > tmp->list->currentLength){
+	// 			return;
+	// 		}
+	// 		DLLElementPtr send = (DLLElementPtr)malloc(sizeof(struct DLLElement));
+	// 		DLL_GetValue(tmp->list, (long *)send);
+	// 		DLL_InsertLast(outputPacketList, (long)send);
+	// 		DLL_DeleteFirst(tmp->list);
+	// 		DLL_Next(tmp->list);
+	// 	}
+	// }
 }
