@@ -3,7 +3,7 @@ TESTS=$(PROJECT)-test $(PROJECT)-test-advanced
 TEST_OUTPUTS=$(PROJECT)-test.out $(PROJECT)-test-advanced.out
 PROG=$(PROJECT)-test
 CC=gcc
-CFLAGS=-std=c11 -Wall -Wextra -pedantic -lm -fcommon
+CFLAGS=-g -std=c11 -Wall -Wextra -pedantic -lm -fcommon
 SHELL=bash
 
 .PHONY: all run tests clean purge

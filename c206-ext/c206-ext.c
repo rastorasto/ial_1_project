@@ -35,7 +35,7 @@ void receive_packet( DLList *packetLists, PacketPtr packet ) {
 		if(tmp->priority == packet->priority){
 			if((tmp->list->currentLength)+1 > MAX_PACKET_COUNT){
 				DLL_First(tmp->list);
-				while(tmp->list->activeElement != NULL){
+				while(tmp->list->activeElement->nextElement != NULL){
 					DLL_DeleteAfter(tmp->list);
 					DLL_Next(tmp->list);
 				}
