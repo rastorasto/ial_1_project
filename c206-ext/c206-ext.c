@@ -32,8 +32,6 @@ void receive_packet( DLList *packetLists, PacketPtr packet ) {
 		error_flag = true;
 		return;
 	}
-	printf("Received packet with priority %d and data %d\n", packet->priority, packet->id);
-	printf("maxpacketcount %d\n", MAX_PACKET_COUNT);
 	DLL_First(packetLists);
 	char priority_order = 0;
 	while(DLL_IsActive(packetLists)){
@@ -41,18 +39,15 @@ void receive_packet( DLList *packetLists, PacketPtr packet ) {
 		DLL_GetValue(packetLists, (long *)&currentqos);
 		if(currentqos->priority == packet->priority) {
 			if(currentqos->list->currentLength + 1 > MAX_PACKET_COUNT) {
-				printf("deleting...");
 				DLL_First(currentqos->list);
 				while(DLL_IsActive(currentqos->list)) {
 					DLL_DeleteAfter(currentqos->list);
 					DLL_Next(currentqos->list);
 				}
 			}
-			printf("found insert\n");
 			DLL_InsertLast(currentqos->list, (long)packet);
 			return;
 		} else if(currentqos->priority > packet->priority) {
-			printf("priority order 1\n");
 			priority_order = 1;
 			break;
 		}
@@ -73,10 +68,8 @@ void receive_packet( DLList *packetLists, PacketPtr packet ) {
 	DLL_Init(newqos->list);
 	DLL_InsertLast(newqos->list, (long)packet);
 	if(priority_order) {
-		printf("priority order 1 insert\n");
 		DLL_InsertBefore(packetLists, (long)newqos);
 	} else {
-		printf("else insert\n");
 		DLL_InsertLast(packetLists, (long)newqos);
 	}
 }
@@ -109,9 +102,9 @@ void send_packets( DLList *packetLists, DLList *outputPacketList, int maxPacketC
 		while (sent < maxPacketCount && DLL_IsActive(current->list)) {
 			long packet = current->list->activeElement->data;
 			DLL_InsertLast(outputPacketList, packet);
-			DLL_DeleteFirst(current->list);
 			sent++;
 			DLL_Next(current->list);
+			DLL_DeleteFirst(current->list);
 		}
 		DLL_Previous(packetLists);
 	}
