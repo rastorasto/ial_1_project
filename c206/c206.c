@@ -327,13 +327,13 @@ void DLL_InsertAfter( DLList *list, long data ) {
 		DLL_Error();
 		return;
 	}
-	newItem->nextElement = list->activeElement->nextElement;
-	newItem->previousElement = list->activeElement;
-	list->activeElement->nextElement = newItem;
+	newItem->nextElement = list->activeElement->nextElement; // Sets the next item of the newItem as the next element of the active element
+	newItem->previousElement = list->activeElement; // Sets the previous element of the newItem as the active element
+	list->activeElement->nextElement = newItem; // Sets the next element of the active element as the newItem
 	if (newItem->nextElement != NULL) {
-		newItem->nextElement->previousElement = newItem;
+		newItem->nextElement->previousElement = newItem; // Sets the previous element after the next element of the newItem to the newItem
 	} else {
-		list->lastElement = newItem;
+		list->lastElement = newItem; // If there isn't any next element, the newItem is the last element
 	}
 	newItem->data = data;
 	list->currentLength++;

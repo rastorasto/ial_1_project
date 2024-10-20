@@ -34,11 +34,11 @@ void receive_packet( DLList *packetLists, PacketPtr packet ) {
 	}
 	DLL_First(packetLists);
 	char priority_order = 0;
-	while(DLL_IsActive(packetLists)){
+	while(DLL_IsActive(packetLists)){ // Goes thrue all elements in packetLists
 		QosPacketListPtr currentqos = NULL;
-		DLL_GetValue(packetLists, (long *)&currentqos);
-		if(currentqos->priority == packet->priority) {
-			if(currentqos->list->currentLength + 1 > MAX_PACKET_COUNT) {
+		DLL_GetValue(packetLists, (long *)&currentqos); // Gets value of current element and converts it to QosPacketListPtr
+		if(currentqos->priority == packet->priority) { // If the priority matches the packet it is inserted to the list
+			if(currentqos->list->currentLength + 1 > MAX_PACKET_COUNT) { // If the list is full, every second element is deleted
 				DLL_First(currentqos->list);
 				while(DLL_IsActive(currentqos->list)) {
 					DLL_DeleteAfter(currentqos->list);
@@ -47,11 +47,11 @@ void receive_packet( DLList *packetLists, PacketPtr packet ) {
 			}
 			DLL_InsertLast(currentqos->list, (long)packet);
 			return;
-		} else if(currentqos->priority > packet->priority) {
+		} else if(currentqos->priority > packet->priority) { // Because I am ordering the lists by priority, if current priority is higher than the packet, it means that the QosPacketList doesnt exist and the packet should be inserted before the current list
 			priority_order = 1;
 			break;
 		}
-		DLL_Next(packetLists);
+		DLL_Next(packetLists); // Goes to next element in packetLists
 	}
 	QosPacketListPtr newqos = (QosPacketListPtr)malloc(sizeof(QosPacketList));
 	if(newqos == NULL) {
@@ -67,9 +67,9 @@ void receive_packet( DLList *packetLists, PacketPtr packet ) {
 	}
 	DLL_Init(newqos->list);
 	DLL_InsertLast(newqos->list, (long)packet);
-	if(priority_order) {
+	if(priority_order) { // Gets inserted before the current list
 		DLL_InsertBefore(packetLists, (long)newqos);
-	} else {
+	} else { // If the priority highest or the list is empty, it gets inserted last
 		DLL_InsertLast(packetLists, (long)newqos);
 	}
 }
@@ -94,18 +94,18 @@ void send_packets( DLList *packetLists, DLList *outputPacketList, int maxPacketC
 		error_flag = true;
 		return;
 	}
-	DLL_Last(packetLists);
-	int sent = 0;
-	while (sent < maxPacketCount && DLL_IsActive(packetLists)) {
-		QosPacketListPtr current = (QosPacketListPtr)packetLists->activeElement->data;
+	DLL_Last(packetLists); // Stars at the end because it's ordered from lowest priority to the highest
+	int sent_packets = 0; // Counter for sent packets
+	while (sent_packets < maxPacketCount && DLL_IsActive(packetLists)) { // Goes thrue all elements in packetLists while there are packets to send
+		QosPacketListPtr current = (QosPacketListPtr)packetLists->activeElement->data; // Gets the current QosPacketList
 		DLL_First(current->list);
-		while (sent < maxPacketCount && DLL_IsActive(current->list)) {
+		while (sent_packets < maxPacketCount && DLL_IsActive(current->list)) { // Goes thrue all elements in the current list while there are packets to send
 			long packet = current->list->activeElement->data;
-			DLL_InsertLast(outputPacketList, packet);
-			sent++;
-			DLL_Next(current->list);
-			DLL_DeleteFirst(current->list);
+			DLL_InsertLast(outputPacketList, packet); // Inserts the packet to the outputPacketList
+			sent_packets++;
+			DLL_Next(current->list); // Moves to the next packet in the list
+			DLL_DeleteFirst(current->list); // Deletes sent packet from the current list
 		}
-		DLL_Previous(packetLists);
+		DLL_Previous(packetLists); // Moves to the previous QosPacketList
 	}
 }
